@@ -10,6 +10,10 @@ NAME = Yokohama
 # Comments in this file are targeted only to the developer, do not
 # expect to learn how to build the kernel reading this file.
 
+CKVERSION = -ck1
+CKNAME = BFS Powered
+EXTRAVERSION := $(EXTRAVERSION)$(CKVERSION)
+
 # Do not:
 # o  use make's built-in rules and variables
 #    (this increases performance and avoids hard-to-debug behaviour);
@@ -189,8 +193,11 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ \
 # Note: Some architectures assign CROSS_COMPILE in their arch/*/Makefile
 export KBUILD_BUILDHOST := $(SUBARCH)
 ARCH		?= arm
-CROSS_COMPILE	?= CROSS_COMPILE	?=/home/dm47021/Android/toolchains/linaro-arm-linux-gnueabihf-4.7/bin/arm-linux-gnueabihf-
-
+CROSS_COMPILE	?=/home/dm47021/Android/toolchains/linaro-arm-linux-gnueabihf-4.7/bin/arm-linux-gnueabihf-
+#CROSS_COMPILE	?= /home/dm47021/Android/toolchains/arm-eabi-linaro-4.6.2/bin/arm-eabi-
+#CROSS_COMPILE	?= /home/dm47021/android/toolchains/linaro-4.7.3/bin/arm-linux-gnueabihf-
+#CROSS_COMPILE	?= /home/dm47021/android/toolchains/arm-eabi-4.4.3/bin/arm-eabi-
+#CROSS_COMPILE	?= /home/downthemachine/toolchain/arm-eabi-4.4.3/bin/arm-eabi-
 # Architecture as present in compile.h
 UTS_MACHINE 	:= $(ARCH)
 SRCARCH 	:= $(ARCH)
@@ -331,12 +338,14 @@ CHECK		= sparse
 
 CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ \
 		  -Wbitwise -Wno-return-void $(CF)
-MODFLAGS	= -DMODULE -fgcse-lm -fgcse-sm -fsched-spec-load -fforce-addr -ffast-math -fsingle-precision-constant -mtune=cortex-a8 -march=armv7-a -mfpu=neon -ftree-vectorize -funswitch-loops
+MODFLAGS        = -DMODULE -march=armv7-a -mfpu=vfpv3 -ftree-vectorize
 CFLAGS_MODULE   = $(MODFLAGS)
 AFLAGS_MODULE   = $(MODFLAGS)
 LDFLAGS_MODULE  = -T $(srctree)/scripts/module-common.lds
-CFLAGS_KERNEL	= -fgcse-lm -fgcse-sm -fsched-spec-load -fforce-addr -ffast-math -fsingle-precision-constant -mtune=cortex-a8 -march=armv7-a -mfpu=neon -ftree-vectorize -funswitch-loops
+CFLAGS_KERNEL	=
 AFLAGS_KERNEL	=
+CFLAGS_KERNEL  = -O1 -mtune=cortex-a8 -ftree-vectorize -ffast-math -fsingle-precision-constant -march=armv7-a -mfpu=vfpv3  
+AFLAGS_KERNEL  = -O1 -mtune=cortex-a8 -ftree-vectorize -ffast-math -fsingle-precision-constant -march=armv7-a -mfpu=vfpv3
 CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage
 
 
@@ -529,8 +538,15 @@ all: vmlinux
 
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS	+= -Os
-else
+endif
+ifdef CONFIG_CC_OPTIMIZE_DEFAULT
 KBUILD_CFLAGS	+= -O2
+endif
+ifdef CONFIG_CC_OPTIMIZE_ALOT
+KBUILD_CFLAGS  += -O3
+endif
+ifdef CONFIG_CC_OPTIMIZE_FAST
+KBUILD_CFLAGS  += -Ofast
 endif
 
 include $(srctree)/arch/$(SRCARCH)/Makefile
