@@ -97,6 +97,7 @@ static struct pll pll2_tbl[] = {
 	{  42, 0, 1, 0 }, /*  806 MHz */
 	{  48, 1, 3, 0 }, /*  921 MHz */	
 	{  53, 1, 3, 0 }, /* 1024 MHz */
+#if defined(CONFIG_ALIEN_OVERCLOCK)
 	{  58, 1, 3, 0 }, /* 1113 MHz */
 	{  63, 1, 3, 0 }, /* 1209 MHz */
 	{  68, 1, 3, 0 }, /* 1305 MHz */
@@ -105,7 +106,10 @@ static struct pll pll2_tbl[] = {
 	{  83, 1, 3, 0 }, /* 1612 MHz */
 	{  88, 1, 3, 0 }, /* 1708 MHz */
 	{  93, 1, 3, 0 }, /* 1804 MHz */
-	{  98, 1, 3, 0 }, /* 1900 MHz */
+#endif
+#if defined(CONFIG_ALIEN_OVERCLOCK) && (CONFIG_WARP_SPEED)
+	{  98, 1, 3, 0 }, /* 1868 MHz */
+#endif
 };
 
 /* Use negative numbers for sources that can't be enabled/disabled */
@@ -119,9 +123,9 @@ static struct pll pll2_tbl[] = {
  */
 static struct clkctl_acpu_speed acpu_freq_tbl[] = {
 	{ 0, 24576,SRC_LPXO, 0, 0,  30720000,  900, VDD_RAW(900) },
-	{ 0, 61440,   PLL_3, 5, 11, 61440000,  900, VDD_RAW(900) },
+	{ 1, 61440,   PLL_3, 5, 11, 61440000,  900, VDD_RAW(900) },
 	{ 1, 122880,  PLL_3, 5, 5,  61440000,  900, VDD_RAW(900) },
-	{ 0, 184320,  PLL_3, 5, 4,  61440000,  900, VDD_RAW(900) },
+	{ 1, 184320,  PLL_3, 5, 4,  61440000,  900, VDD_RAW(900) },
 	{ 0, MAX_AXI_KHZ, SRC_AXI, 1, 0, 61440000, 900, VDD_RAW(900) },
 	{ 1, 245760,  PLL_3, 5, 2,  61440000,  900, VDD_RAW(900) },
 	{ 1, 368640,  PLL_3, 5, 1,  122800000, 900, VDD_RAW(900) },
@@ -132,6 +136,7 @@ static struct clkctl_acpu_speed acpu_freq_tbl[] = {
 	{ 1, 806400,  PLL_2, 3, 0, UINT_MAX, 1000, VDD_RAW(1000), &pll2_tbl[0]},
 	{ 1, 921600,  PLL_2, 3, 0, UINT_MAX, 1000, VDD_RAW(1000), &pll2_tbl[1]},
 	{ 1, 1024000, PLL_2, 3, 0, UINT_MAX, 1000, VDD_RAW(1000), &pll2_tbl[2]},
+#if defined(CONFIG_ALIEN_OVERCLOCK)
 	{ 0, 1113000, PLL_2, 3, 0, UINT_MAX, 1050, VDD_RAW(1050), &pll2_tbl[3]},
 	{ 1, 1209600, PLL_2, 3, 0, UINT_MAX, 1100, VDD_RAW(1100), &pll2_tbl[4]},
 	{ 1, 1305600, PLL_2, 3, 0, UINT_MAX, 1150, VDD_RAW(1150), &pll2_tbl[5]},
@@ -140,7 +145,10 @@ static struct clkctl_acpu_speed acpu_freq_tbl[] = {
 	{ 1, 1612800, PLL_2, 3, 0, UINT_MAX, 1350, VDD_RAW(1350), &pll2_tbl[8]},
 	{ 1, 1708800, PLL_2, 3, 0, UINT_MAX, 1400, VDD_RAW(1400), &pll2_tbl[9]},
 	{ 1, 1804800, PLL_2, 3, 0, UINT_MAX, 1450, VDD_RAW(1450), &pll2_tbl[10]},
-	{ 0, 1900800, PLL_2, 3, 0, UINT_MAX, 1550, VDD_RAW(1550), &pll2_tbl[11]},
+#endif
+#if defined(CONFIG_ALIEN_OVERCLOCK) && (CONFIG_WARP_SPEED)
+	{ 1, 1868800, PLL_2, 3, 0, UINT_MAX, 1475, VDD_RAW(1475), &pll2_tbl[11]},
+#endif
 	{ 0 }
 };
 

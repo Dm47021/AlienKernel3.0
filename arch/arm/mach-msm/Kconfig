@@ -1015,6 +1015,15 @@ config MSM_CPU_FREQ_MIN
 
 endif # CPU_FREQ_MSM
 
+config ALIEN_OVERCLOCK
+  bool "Enable Overclocking in Alien Kernel 4"
+  default n
+
+config WARP_SPEED
+  bool "Enable Warp Speed, An extra 64mhz boost in OC Mode"
+  depends on ALIEN_OVERCLOCK
+  default n
+
 config MSM_CPU_AVS
 	bool "Enable software controlled Adaptive Voltage Scaling (AVS)"
 	depends on (ARCH_MSM_SCORPION && QSD_SVS)
