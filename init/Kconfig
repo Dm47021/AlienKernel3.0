@@ -23,6 +23,12 @@ config CONSTRUCTORS
 
 menu "General setup"
 
+config ALIEN_4_SCHEDULER
+        bool "Enable Alien 4 Scheduling tweaks and patches"
+        ---help---
+        Alien 4 Scheduler takes tweaks from CK2, kernelizer, and other patches.
+        Great for Low Latency and quick response in Android.
+
 config SCHED_BFS
         bool "BFS cpu scheduler"
         ---help---

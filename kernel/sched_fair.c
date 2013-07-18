@@ -54,9 +54,13 @@ enum sched_tunable_scaling sysctl_sched_tunable_scaling
  * Minimal preemption granularity for CPU-bound tasks:
  * (default: 2 msec * (1 + ilog(ncpus)), units: nanoseconds)
  */
+#if defined(CONFIG_ALIEN_4_SCHEDULER)
+unsigned int sysctl_sched_min_granularity = 750000ULL;
+unsigned int normalized_sysctl_sched_min_granularity = 750000ULL;
+#else
 unsigned int sysctl_sched_min_granularity = 2000000ULL;
 unsigned int normalized_sysctl_sched_min_granularity = 2000000ULL;
-
+#endif
 /*
  * is kept at sysctl_sched_latency / sysctl_sched_min_granularity
  */
