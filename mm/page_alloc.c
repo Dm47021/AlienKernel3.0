@@ -165,8 +165,13 @@ static char * const zone_names[MAX_NR_ZONES] = {
 	 "Movable",
 };
 
+#if defined(CONFIG_ALIEN_4_SCHEDULER) && (CONFIG_ALIEN_4_KERNELIZER_TWEAKS)
+int min_free_kbytes = 4096;
+int min_free_order_shift = 4;
+#else
 int min_free_kbytes = 1024;
 int min_free_order_shift = 1;
+#endif
 
 static unsigned long __meminitdata nr_kernel_pages;
 static unsigned long __meminitdata nr_all_pages;

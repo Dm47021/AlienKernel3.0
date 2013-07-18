@@ -691,7 +691,11 @@ enum {
 
 const_debug unsigned int sysctl_sched_features =
 #include "sched_features.h"
+#if defined(CONFIG_ALIEN_4_SCHEDULER) && (CONFIG_ALIEN_4_KERNELIZER_TWEAKS)
+    24189;
+#else
 	0;
+#endif
 
 #undef SCHED_FEAT
 

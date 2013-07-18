@@ -29,8 +29,13 @@
 #include <linux/memcontrol.h>
 #include <linux/security.h>
 
+#if defined(CONFIG_ALIEN_4_SCHEDULER) && (CONFIG_ALIEN_4_KERNELIZER_TWEAKS)
+int sysctl_panic_on_oom = 0;
+int sysctl_oom_kill_allocating_task = 0;
+#else
 int sysctl_panic_on_oom;
 int sysctl_oom_kill_allocating_task;
+#endif
 int sysctl_oom_dump_tasks;
 static DEFINE_SPINLOCK(zone_scan_lock);
 /* #define DEBUG */

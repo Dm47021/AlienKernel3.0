@@ -60,7 +60,12 @@ static inline long sync_writeback_pages(unsigned long dirtied)
 /*
  * Start background writeback (via writeback threads) at this percentage
  */
+
+#if defined(CONFIG_ALIEN_4_SCHEDULER) && (CONFIG_ALIEN_4_KERNELIZER_TWEAKS)
+int dirty_background_ratio = 60;
+#else
 int dirty_background_ratio = 10;
+#endif
 
 /*
  * dirty_background_bytes starts at 0 (disabled) so that it is a function of
@@ -77,7 +82,12 @@ int vm_highmem_is_dirtyable;
 /*
  * The generator of dirty data starts writeback at this percentage
  */
+
+#if defined(CONFIG_ALIEN_4_SCHEDULER) && (CONFIG_ALIEN_4_KERNELIZER_TWEAKS)
+int vm_dirty_ratio = 95;
+#else
 int vm_dirty_ratio = 20;
+#endif
 
 /*
  * vm_dirty_bytes starts at 0 (disabled) so that it is a function of
@@ -88,12 +98,22 @@ unsigned long vm_dirty_bytes;
 /*
  * The interval between `kupdate'-style writebacks
  */
+
+#if defined(CONFIG_ALIEN_4_SCHEDULER) && (CONFIG_ALIEN_4_KERNELIZER_TWEAKS)
+unsigned int dirty_writeback_interval = 20 * 100; /* centiseconds */
+#else
 unsigned int dirty_writeback_interval = 5 * 100; /* centiseconds */
+#endif
 
 /*
  * The longest time for which data is allowed to remain dirty
  */
+
+#if defined(CONFIG_ALIEN_4_SCHEDULER) && (CONFIG_ALIEN_4_KERNELIZER_TWEAKS)
+unsigned int dirty_expire_interval = 10 * 100; /* centiseconds */
+#else
 unsigned int dirty_expire_interval = 30 * 100; /* centiseconds */
+#endif
 
 /*
  * Flag that makes the machine dump writes/reads and block dirtyings.

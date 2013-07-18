@@ -29,6 +29,11 @@ config ALIEN_4_SCHEDULER
         Alien 4 Scheduler takes tweaks from CK2, kernelizer, and other patches.
         Great for Low Latency and quick response in Android.
 
+config ALIEN_4_KERNELIZER_TWEAKS
+  bool "Enable Alien Kernelizer Tweaks, Originally by LorDClockaN "
+  depends on ALIEN_4_SCHEDULER
+  default n
+
 config SCHED_BFS
         bool "BFS cpu scheduler"
         ---help---

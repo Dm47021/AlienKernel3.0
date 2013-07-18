@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.35.7
-# Thu Jul 18 01:50:29 2013
+# Thu Jul 18 03:26:16 2013
 #
 CONFIG_ARM=y
 CONFIG_SYS_SUPPORTS_APM_EMULATION=y
@@ -32,6 +32,7 @@ CONFIG_CONSTRUCTORS=y
 # General setup
 #
 CONFIG_ALIEN_4_SCHEDULER=y
+CONFIG_ALIEN_4_KERNELIZER_TWEAKS=y
 # CONFIG_SCHED_BFS is not set
 CONFIG_EXPERIMENTAL=y
 CONFIG_BROKEN_ON_SMP=y
