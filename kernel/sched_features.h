@@ -3,7 +3,12 @@
  * them to run sooner, but does not allow tons of sleepers to
  * rip the spread apart.
  */
+
+#if defined(CONFIG_ALIEN_4_SCHEDULER)
+SCHED_FEAT(GENTLE_FAIR_SLEEPERS, 0)
+#else
 SCHED_FEAT(GENTLE_FAIR_SLEEPERS, 1)
+#endif
 
 /*
  * Place new tasks ahead so that they do not starve already running
