@@ -34,6 +34,11 @@ config ALIEN_4_KERNELIZER_TWEAKS
   depends on ALIEN_4_SCHEDULER
   default n
 
+config ALIEN_4_BIG_MEMORY
+        bool "Enable Alien 4 alternate memory mapping for 400MB of free ram (outside kernel)"
+        ---help---
+        Alien 4 Big Memory re-allocates pmem for 400mb free instead of 378 stock.
+
 config SCHED_BFS
         bool "BFS cpu scheduler"
         ---help---
