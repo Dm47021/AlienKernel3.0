@@ -36,7 +36,7 @@
 #include "internal.h"
 
 #if defined(CONFIG_ALIEN_4_SCHEDULER) && (CONFIG_ALIEN_4_KERNELIZER_TWEAKS)
-int sysctl_vfs_cache_pressure __read_mostly = 20;
+int sysctl_vfs_cache_pressure __read_mostly = 50;
 #else
 int sysctl_vfs_cache_pressure __read_mostly = 100;
 #endif
