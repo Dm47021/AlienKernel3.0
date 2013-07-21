@@ -36,6 +36,7 @@ struct cpufreq_work_struct {
 };
 
 static DEFINE_PER_CPU(struct cpufreq_work_struct, cpufreq_work);
+static struct workqueue_struct *msm_cpufreq_wq;
 #endif
 
 static DEFINE_MUTEX(msm_cpufreq_voter_lock);
@@ -157,7 +158,7 @@ static int msm_cpufreq_target(struct cpufreq_policy *policy,
 
 		init_completion(&cpu_work->complete);
 		cancel_work_sync(&cpu_work->work);
-		schedule_work_on(policy->cpu, &cpu_work->work);
+		queue_work_on(policy->cpu, msm_cpufreq_wq, &cpu_work->work);
 		wait_for_completion(&cpu_work->complete);
 		ret = cpu_work->status;
 	}
