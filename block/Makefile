@@ -15,7 +15,6 @@ obj-$(CONFIG_IOSCHED_DEADLINE)	+= deadline-iosched.o
 obj-$(CONFIG_IOSCHED_CFQ)	+= cfq-iosched.o
 obj-$(CONFIG_IOSCHED_VR)        += vr-iosched.o
 obj-$(CONFIG_IOSCHED_SIO)       += sio-iosched.o
-obj-$(CONFIG_IOSCHED_AREA51)       += area51-iosched.o
 
 obj-$(CONFIG_BLOCK_COMPAT)	+= compat_ioctl.o
 obj-$(CONFIG_BLK_DEV_INTEGRITY)	+= blk-integrity.o

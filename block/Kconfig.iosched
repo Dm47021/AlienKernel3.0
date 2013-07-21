@@ -30,15 +30,6 @@ config IOSCHED_DEADLINE
 	  a new point in the service tree and doing a batch of IO from there
 	  in case of expiry.
 
-config IOSCHED_AREA51
-  tristate "Area51 I/O scheduler"
-  default y
-  ---help---
-    Based on Zen Iosched.
-    FCFS, dispatches are back-inserted, deadlines ensure fairness.
-    Should work best with devices where there is no travel delay.
-
-
 config IOSCHED_CFQ
 	tristate "CFQ I/O scheduler"
 	# If BLK_CGROUP is a module, CFQ has to be built as module.
@@ -100,9 +91,6 @@ choice
 	config DEFAULT_SIO
 		bool "SIO" if IOSCHED_SIO=y
 
-       config DEFAULT_AREA51
-                bool "AREA51" if IOSCHED_ZEN=y
-
         config DEFAULT_AS
 		bool "Anticipatory" if IOSCHED_AS=y
 
@@ -113,7 +101,6 @@ config DEFAULT_IOSCHED
         default "anticipatory" if DEFAULT_AS
 	default "deadline" if DEFAULT_DEADLINE
 	default "cfq" if DEFAULT_CFQ
-        default "zen" if DEFAULT_AREA51
 	default "noop" if DEFAULT_NOOP
         default "vr" if DEFAULT_VR
         default "sio" if DEFAULT_SIO

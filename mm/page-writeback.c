@@ -62,7 +62,7 @@ static inline long sync_writeback_pages(unsigned long dirtied)
  */
 
 #if defined(CONFIG_ALIEN_4_SCHEDULER) && (CONFIG_ALIEN_4_KERNELIZER_TWEAKS)
-int dirty_background_ratio = 1;
+int dirty_background_ratio = 60;
 #else
 int dirty_background_ratio = 10;
 #endif
@@ -84,7 +84,7 @@ int vm_highmem_is_dirtyable;
  */
 
 #if defined(CONFIG_ALIEN_4_SCHEDULER) && (CONFIG_ALIEN_4_KERNELIZER_TWEAKS)
-int vm_dirty_ratio = 2;
+int vm_dirty_ratio = 95;
 #else
 int vm_dirty_ratio = 20;
 #endif
@@ -100,7 +100,7 @@ unsigned long vm_dirty_bytes;
  */
 
 #if defined(CONFIG_ALIEN_4_SCHEDULER) && (CONFIG_ALIEN_4_KERNELIZER_TWEAKS)
-unsigned int dirty_writeback_interval = 3 * 100; /* centiseconds */
+unsigned int dirty_writeback_interval = 20 * 100; /* centiseconds */
 #else
 unsigned int dirty_writeback_interval = 5 * 100; /* centiseconds */
 #endif
@@ -110,7 +110,7 @@ unsigned int dirty_writeback_interval = 5 * 100; /* centiseconds */
  */
 
 #if defined(CONFIG_ALIEN_4_SCHEDULER) && (CONFIG_ALIEN_4_KERNELIZER_TWEAKS)
-unsigned int dirty_expire_interval = 0.5 * 100; /* centiseconds */
+unsigned int dirty_expire_interval = 10 * 100; /* centiseconds */
 #else
 unsigned int dirty_expire_interval = 30 * 100; /* centiseconds */
 #endif
