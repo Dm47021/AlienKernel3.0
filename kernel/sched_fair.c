@@ -904,7 +904,11 @@ check_preempt_tick(struct cfs_rq *cfs_rq, struct sched_entity *curr)
 		struct sched_entity *se = __pick_next_entity(cfs_rq);
 		s64 delta = curr->vruntime - se->vruntime;
 
+#if defined(CONFIG_ALIEN_4_SCHEDULER)
+                if (delta > calc_delta_fair(ideal_runtime, curr))if (delta > ideal_runtime)
+#else
 		if (delta > ideal_runtime)
+#endif
 			resched_task(rq_of(cfs_rq)->curr);
 	}
 }
