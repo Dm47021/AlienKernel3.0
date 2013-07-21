@@ -43,11 +43,7 @@
  * towards the ideal frequency and slower after it has passed it. Similarly,
  * lowering the frequency towards the ideal frequency is faster than below it.
  */
-#if defined(CONFIG_ALIEN_OVERCLOCK)
-#define DEFAULT_AWAKE_IDEAL_FREQ 1401600
-#else
 #define DEFAULT_AWAKE_IDEAL_FREQ 768000
-#endif
 static unsigned int awake_ideal_freq;
 
 /*
@@ -56,11 +52,7 @@ static unsigned int awake_ideal_freq;
  * that practically when sleep_ideal_freq==0 the awake_ideal_freq is used
  * also when suspended).
  */
-#if defined(CONFIG_ALIEN_OVERCLOCK)
-#define DEFAULT_SLEEP_IDEAL_FREQ 61440
-#else
 #define DEFAULT_SLEEP_IDEAL_FREQ 245760
-#endif
 static unsigned int sleep_ideal_freq;
 
 /*
@@ -82,11 +74,7 @@ static unsigned int ramp_down_step;
 /*
  * CPU freq will be increased if measured load > max_cpu_load;
  */
-#if defined(CONFIG_ALIEN_OVERCLOCK)
-#define DEFAULT_MAX_CPU_LOAD 40
-#else
 #define DEFAULT_MAX_CPU_LOAD 50
-#endif
 static unsigned long max_cpu_load;
 
 /*
@@ -99,11 +87,7 @@ static unsigned long min_cpu_load;
  * The minimum amount of time to spend at a frequency before we can ramp up.
  * Notice we ignore this when we are below the ideal frequency.
  */
-#if defined(CONFIG_ALIEN_OVERCLOCK)
-#define DEFAULT_UP_RATE_US 10000;
-#else
 #define DEFAULT_UP_RATE_US 48000;
-#endif
 static unsigned long up_rate_us;
 
 /*
