@@ -76,6 +76,9 @@
 #include <linux/ftrace.h>
 #include <linux/slab.h>
 #include <linux/cpuacct.h>
+#if defined(CONFIG_ALIEN_4_SCHEDULER)
+#include <linux/kernel.h>
+#endif
 
 #include <asm/tlb.h>
 #include <asm/irq_regs.h>
@@ -420,6 +423,9 @@ struct rt_rq {
  */
 struct root_domain {
 	atomic_t refcount;
+#if defined(CONFIG_ALIEN_4_SCHEDULER)
+        struct rcu_head rcu;
+#endif
 	cpumask_var_t span;
 	cpumask_var_t online;
 
@@ -6089,11 +6095,17 @@ sd_parent_degenerate(struct sched_domain *sd, struct sched_domain *parent)
 
 	return 1;
 }
-
+#if defined(CONFIG_ALIEN_4_SCHEDULER)
+static void free_rootdomain(struct rcu_head *rcu)
+#else
 static void free_rootdomain(struct root_domain *rd)
+#endif
 {
+#if defined(CONFIG_ALIEN_4_SCHEDULER)
+struct root_domain *rd = container_of(rcu, struct root_domain, rcu);
+#else
 	synchronize_sched();
-
+#endif
 	cpupri_cleanup(&rd->cpupri);
 
 	free_cpumask_var(rd->rto_mask);
@@ -6136,7 +6148,11 @@ static void rq_attach_root(struct rq *rq, struct root_domain *rd)
 	raw_spin_unlock_irqrestore(&rq->lock, flags);
 
 	if (old_rd)
+#if defined(CONFIG_ALIEN_4_SCHEDULER)
+         call_rcu_sched(&old_rd->rcu, free_rootdomain);
+#else       
 		free_rootdomain(old_rd);
+#endif
 }
 
 static int init_rootdomain(struct root_domain *rd, bool bootmem)
@@ -6779,7 +6795,11 @@ static void __free_domain_allocs(struct s_data *d, enum s_alloc what,
 		free_sched_groups(cpu_map, d->tmpmask); /* fall through */
 		d->sched_group_nodes = NULL;
 	case sa_rootdomain:
+#if defined(CONFIG_ALIEN_4_SCHEDULER)
+                free_rootdomain(&(d->rd->rcu)); /* fall through */
+#else
 		free_rootdomain(d->rd); /* fall through */
+#endif
 	case sa_tmpmask:
 		free_cpumask_var(d->tmpmask); /* fall through */
 	case sa_send_covered:
