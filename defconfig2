@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.35.7
-# Sun Jul 21 11:41:27 2013
+# Sun Jul 21 15:49:22 2013
 #
 CONFIG_ARM=y
 CONFIG_SYS_SUPPORTS_APM_EMULATION=y
@@ -989,6 +989,7 @@ CONFIG_FIRMWARE_IN_KERNEL=y
 CONFIG_EXTRA_FIRMWARE=""
 # CONFIG_SYS_HYPERVISOR is not set
 # CONFIG_GENLOCK is not set
+CONFIG_PM_OPP=y
 # CONFIG_CONNECTOR is not set
 # CONFIG_MTD is not set
 # CONFIG_PARPORT is not set
@@ -2153,6 +2154,7 @@ CONFIG_ANDROID_LOW_MEMORY_KILLER=y
 # CONFIG_IIO is not set
 CONFIG_XVMALLOC=y
 CONFIG_ZRAM=y
+CONFIG_ZRAM_NUM_DEVICES=1
 # CONFIG_ZRAM_DEBUG is not set
 CONFIG_ZCACHE=y
 # CONFIG_QCACHE is not set
