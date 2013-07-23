@@ -48,6 +48,18 @@ choice
 	 1000 Hz is the preferred choice for desktop systems and other
 	 systems requiring fast interactive responses to events.
 
+config HZ_1500
+		bool "1500 HZ"
+	help
+	 1500 Hz is the insane choice for desktop systems and other
+	 systems requiring fast interactive responses to events.
+
+config HZ_2000
+		bool "2002 HZ"
+	help
+	 2000 Hz is the insane choice for desktop systems and other
+	 systems requiring fast interactive responses to events.
+
 endchoice
 
 config HZ
@@ -57,6 +69,8 @@ config HZ
 	default 300 if HZ_300
         default 750 if HZ_750
 	default 1000 if HZ_1000
+        default 1500 if HZ_1500
+	default 2000 if HZ_2000
 
 config SCHED_HRTICK
 	def_bool HIGH_RES_TIMERS && (!SMP || USE_GENERIC_SMP_HELPERS)
