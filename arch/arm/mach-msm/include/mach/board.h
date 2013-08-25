@@ -335,10 +335,11 @@ void __init msm_add_devices(void);
 void __init msm_map_common_io(void);
 void __init msm_map_qsd8x50_io(void);
 void __init msm_map_msm8x60_io(void);
+void __init msm_map_msm8960_io(void);
 void __init msm_map_msm7x30_io(void);
-void __init msm_map_comet_io(void);
+void __init msm_map_fsm9xxx_io(void);
 void __init msm_init_irq(void);
-void __init msm_clock_init(struct clk_lookup *clock_tbl, unsigned num_clocks);
+void __init msm_clock_init(struct clk_lookup *clock_tbl, size_t num_clocks);
 void __init msm_acpu_clock_init(struct msm_acpu_clock_platform_data *);
 
 struct mmc_platform_data;
