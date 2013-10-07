@@ -706,11 +706,12 @@ struct input_absinfo {
 #define ABS_MT_BLOB_ID		0x38	/* Group a set of packets as a blob */
 #define ABS_MT_TRACKING_ID	0x39	/* Unique ID of initiated contact */
 #define ABS_MT_PRESSURE		0x3a	/* Pressure on contact area */
+#define ABS_MT_DISTANCE         0x3b    /* Contact hover distance */
 
 #ifdef __KERNEL__
 /* Implementation details, userspace should not care about these */
 #define ABS_MT_FIRST    ABS_MT_TOUCH_MAJOR
-#define ABS_MT_LAST    ABS_MT_PRESSURE
+#define ABS_MT_LAST     ABS_MT_DISTANCE
 #endif
 
 #define ABS_MAX			0x3f
@@ -1053,14 +1054,6 @@ struct ff_effect {
 #include <linux/fs.h>
 #include <linux/timer.h>
 #include <linux/mod_devicetable.h>
-
-/**
- * struct input_mt_slot - represents the state of an input MT slot
- * @abs: holds current values of ABS_MT axes for this slot
- */
-struct input_mt_slot {
-  int abs[ABS_MT_LAST - ABS_MT_FIRST + 1];
-};
 
 /**
  * struct input_dev - represents an input device
@@ -1429,11 +1422,6 @@ static inline void input_mt_sync(struct input_dev *dev)
 	input_event(dev, EV_SYN, SYN_MT_REPORT, 0);
 }
 
-static inline void input_mt_slot(struct input_dev *dev, int slot)
-{
-  input_event(dev, EV_ABS, ABS_MT_SLOT, slot);
-}
-
 void input_set_capability(struct input_dev *dev, unsigned int type, unsigned int code);
 
 static inline void input_set_abs_params(struct input_dev *dev, int axis, int min, int max, int fuzz, int flat)
@@ -1512,9 +1500,6 @@ int input_ff_erase(struct input_dev *dev, int effect_id, struct file *file);
 
 int input_ff_create_memless(struct input_dev *dev, void *data,
 		int (*play_effect)(struct input_dev *, void *, struct ff_effect *));
-
-int input_mt_create_slots(struct input_dev *dev, unsigned int num_slots);
-void input_mt_destroy_slots(struct input_dev *dev);
 
 #endif
 #endif
