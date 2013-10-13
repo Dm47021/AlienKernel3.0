@@ -193,7 +193,8 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ \
 # Note: Some architectures assign CROSS_COMPILE in their arch/*/Makefile
 export KBUILD_BUILDHOST := $(SUBARCH)
 ARCH		?= arm
-CROSS_COMPILE	?=/home/dm47021/Android/toolchains/arm-cortex_a8-linux-gnueabi-linaro_4.7.4-2013.08/bin/arm-cortex_a8-linux-gnueabi-
+CROSS_COMPILE	?=/home/dm47021/Android/toolchains/arm-unknown-linux-gnueabi-linaro_4.8.2-2013.08/bin/arm-unknown-linux-gnueabi-
+#CROSS_COMPILE	?=/home/dm47021/Android/toolchains/arm-cortex_a8-linux-gnueabi-linaro_4.7.4-2013.08/bin/arm-cortex_a8-linux-gnueabi-
 #CROSS_COMPILE	?=/home/dm47021/Android/toolchains/linaro-arm-linux-gnueabihf-4.7/bin/arm-linux-gnueabihf-
 #CROSS_COMPILE	?= /home/dm47021/Android/toolchains/arm-eabi-linaro-4.6.2/bin/arm-eabi-
 #CROSS_COMPILE	?= /home/dm47021/android/toolchains/linaro-4.7.3/bin/arm-linux-gnueabihf-
