@@ -70,8 +70,6 @@ extern void rcu_init(void);
 #include <linux/rcutree.h>
 #elif defined(CONFIG_TINY_RCU)
 #include <linux/rcutiny.h>
-#elif defined(CONFIG_JRCU)
-#include <linux/jrcu.h>
 #else
 #error "Unknown RCU implementation specified to kernel configuration"
 #endif
@@ -92,7 +90,6 @@ extern void rcu_init(void);
 extern void init_rcu_head_on_stack(struct rcu_head *head);
 extern void destroy_rcu_head_on_stack(struct rcu_head *head);
 #else /* !CONFIG_DEBUG_OBJECTS_RCU_HEAD */
-
 static inline void init_rcu_head_on_stack(struct rcu_head *head)
 {
 }
@@ -100,7 +97,7 @@ static inline void init_rcu_head_on_stack(struct rcu_head *head)
 static inline void destroy_rcu_head_on_stack(struct rcu_head *head)
 {
 }
-#endif  /* #else !CONFIG_DEBUG_OBJECTS_RCU_HEAD */
+#endif	/* #else !CONFIG_DEBUG_OBJECTS_RCU_HEAD */
 
 #ifdef CONFIG_DEBUG_LOCK_ALLOC
 
@@ -305,7 +302,7 @@ extern int rcu_my_thread_group_empty(void);
  * until after the all the other CPUs exit their critical sections.
  *
  * Note, however, that RCU callbacks are permitted to run concurrently
- * with RCU read-side critical sections.  One way that this can happen
+ * with new RCU read-side critical sections.  One way that this can happen
  * is via the following sequence of events: (1) CPU 0 enters an RCU
  * read-side critical section, (2) CPU 1 invokes call_rcu() to register
  * an RCU callback, (3) CPU 0 exits the RCU read-side critical section,
@@ -500,11 +497,13 @@ extern void wakeme_after_rcu(struct rcu_head  *head);
 /**
  * call_rcu - Queue an RCU callback for invocation after a grace period.
  * @head: structure to be used for queueing the RCU updates.
- * @func: actual update function to be invoked after the grace period
+ * @func: actual callback function to be invoked after the grace period
  *
- * The update function will be invoked some time after a full grace
- * period elapses, in other words after all currently executing RCU
- * read-side critical sections have completed.  RCU read-side critical
+ * The callback function will be invoked some time after a full grace
+ * period elapses, in other words after all pre-existing RCU read-side
+ * critical sections have completed.  However, the callback function
+ * might well execute concurrently with RCU read-side critical sections
+ * that started after call_rcu() was invoked.  RCU read-side critical
  * sections are delimited by rcu_read_lock() and rcu_read_unlock(),
  * and may be nested.
  */
@@ -514,9 +513,9 @@ extern void call_rcu(struct rcu_head *head,
 /**
  * call_rcu_bh - Queue an RCU for invocation after a quicker grace period.
  * @head: structure to be used for queueing the RCU updates.
- * @func: actual update function to be invoked after the grace period
+ * @func: actual callback function to be invoked after the grace period
  *
- * The update function will be invoked some time after a full grace
+ * The callback function will be invoked some time after a full grace
  * period elapses, in other words after all currently executing RCU
  * read-side critical sections have completed. call_rcu_bh() assumes
  * that the read-side critical sections end on completion of a softirq
@@ -539,27 +538,27 @@ extern void call_rcu_bh(struct rcu_head *head,
  */
 
 #ifdef CONFIG_DEBUG_OBJECTS_RCU_HEAD
-# define STATE_RCU_HEAD_READY  0
-# define STATE_RCU_HEAD_QUEUED  1
+# define STATE_RCU_HEAD_READY	0
+# define STATE_RCU_HEAD_QUEUED	1
 
 extern struct debug_obj_descr rcuhead_debug_descr;
 
 static inline void debug_rcu_head_queue(struct rcu_head *head)
 {
-  debug_object_activate(head, &rcuhead_debug_descr);
-  debug_object_active_state(head, &rcuhead_debug_descr,
-          STATE_RCU_HEAD_READY,
-          STATE_RCU_HEAD_QUEUED);
+	debug_object_activate(head, &rcuhead_debug_descr);
+	debug_object_active_state(head, &rcuhead_debug_descr,
+				  STATE_RCU_HEAD_READY,
+				  STATE_RCU_HEAD_QUEUED);
 }
 
 static inline void debug_rcu_head_unqueue(struct rcu_head *head)
 {
-  debug_object_active_state(head, &rcuhead_debug_descr,
-          STATE_RCU_HEAD_QUEUED,
-          STATE_RCU_HEAD_READY);
-  debug_object_deactivate(head, &rcuhead_debug_descr);
+	debug_object_active_state(head, &rcuhead_debug_descr,
+				  STATE_RCU_HEAD_QUEUED,
+				  STATE_RCU_HEAD_READY);
+	debug_object_deactivate(head, &rcuhead_debug_descr);
 }
-#else  /* !CONFIG_DEBUG_OBJECTS_RCU_HEAD */
+#else	/* !CONFIG_DEBUG_OBJECTS_RCU_HEAD */
 static inline void debug_rcu_head_queue(struct rcu_head *head)
 {
 }
@@ -567,19 +566,19 @@ static inline void debug_rcu_head_queue(struct rcu_head *head)
 static inline void debug_rcu_head_unqueue(struct rcu_head *head)
 {
 }
-#endif  /* #else !CONFIG_DEBUG_OBJECTS_RCU_HEAD */
+#endif	/* #else !CONFIG_DEBUG_OBJECTS_RCU_HEAD */
 
 #ifndef CONFIG_PROVE_RCU
 #define __do_rcu_dereference_check(c) do { } while (0)
 #endif /* #ifdef CONFIG_PROVE_RCU */
 
 #define __rcu_dereference_index_check(p, c) \
-  ({ \
-    typeof(p) _________p1 = ACCESS_ONCE(p); \
-    __do_rcu_dereference_check(c); \
-    smp_read_barrier_depends(); \
-    (_________p1); \
-  })
+	({ \
+		typeof(p) _________p1 = ACCESS_ONCE(p); \
+		__do_rcu_dereference_check(c); \
+		smp_read_barrier_depends(); \
+		(_________p1); \
+	})
 
 /**
  * rcu_dereference_index_check() - rcu_dereference for indices with debug checking
@@ -600,6 +599,6 @@ static inline void debug_rcu_head_unqueue(struct rcu_head *head)
  * not make sense as of early 2010.
  */
 #define rcu_dereference_index_check(p, c) \
-  __rcu_dereference_index_check((p), (c))
+	__rcu_dereference_index_check((p), (c))
 
 #endif /* __LINUX_RCUPDATE_H */
