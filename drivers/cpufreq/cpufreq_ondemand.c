@@ -31,16 +31,19 @@
  * It helps to keep variable names smaller, simpler
  */
 
-#define DEF_FREQUENCY_DOWN_DIFFERENTIAL         (17)
-#define DEF_FREQUENCY_UP_THRESHOLD              (63)
+#define DEF_FREQUENCY_DOWN_DIFFERENTIAL                (10)
+#define DEF_FREQUENCY_UP_THRESHOLD                (80)
 #define DEF_SAMPLING_DOWN_FACTOR                (1)
 #define MAX_SAMPLING_DOWN_FACTOR                (100000)
-#define MICRO_FREQUENCY_DOWN_DIFFERENTIAL       (3)
-#define MICRO_FREQUENCY_UP_THRESHOLD            (80)
-#define MICRO_FREQUENCY_MIN_SAMPLE_RATE         (10000)
-#define MIN_FREQUENCY_UP_THRESHOLD              (11)
-#define MAX_FREQUENCY_UP_THRESHOLD              (100)
-#define MIN_FREQUENCY_DOWN_DIFFERENTIAL         (1)
+#define MICRO_FREQUENCY_DOWN_DIFFERENTIAL        (3)
+#define MICRO_FREQUENCY_UP_THRESHOLD                (95)
+#define MICRO_FREQUENCY_MIN_SAMPLE_RATE                (10000)
+#define MIN_FREQUENCY_UP_THRESHOLD                (11)
+#define MAX_FREQUENCY_UP_THRESHOLD                (100)
+#define MIN_FREQUENCY_DOWN_DIFFERENTIAL                (1)
+#define DEFAULT_FREQ_BOOST_TIME                        (2500000)
+
+u64 freq_boosted_time;
 
 /*
  * The polling frequency of this governor depends on the capability of
@@ -52,12 +55,12 @@
  * this governor will not work.
  * All times here are in uS.
  */
-#define MIN_SAMPLING_RATE_RATIO                 (2)
+#define MIN_SAMPLING_RATE_RATIO                        (2)
 
 static unsigned int min_sampling_rate;
 
-#define LATENCY_MULTIPLIER                      (1000)
-#define MIN_LATENCY_MULTIPLIER                  (100)
+#define LATENCY_MULTIPLIER                        (1000)
+#define MIN_LATENCY_MULTIPLIER                        (100)
 #define TRANSITION_LATENCY_LIMIT                (10 * 1000 * 1000)
 
 static void do_dbs_timer(struct work_struct *work);
@@ -100,7 +103,7 @@ struct cpu_dbs_info_s {
 };
 static DEFINE_PER_CPU(struct cpu_dbs_info_s, od_cpu_dbs_info);
 
-static unsigned int dbs_enable; /* number of CPUs using this policy */
+static unsigned int dbs_enable;        /* number of CPUs using this policy */
 
 /*
  * dbs_mutex protects data in dbs_tuners_ins from concurrent changes on
@@ -108,7 +111,7 @@ static unsigned int dbs_enable; /* number of CPUs using this policy */
  */
 static DEFINE_MUTEX(dbs_mutex);
 
-static struct workqueue_struct  *kondemand_wq;
+static struct workqueue_struct        *kondemand_wq;
 
 static struct dbs_tuners {
         unsigned int sampling_rate;
@@ -118,12 +121,16 @@ static struct dbs_tuners {
         unsigned int sampling_down_factor;
         unsigned int powersave_bias;
         unsigned int io_is_busy;
+        unsigned int boosted;
+        unsigned int freq_boost_time;
+        unsigned int boostfreq;
 } dbs_tuners_ins = {
         .up_threshold = DEF_FREQUENCY_UP_THRESHOLD,
         .sampling_down_factor = DEF_SAMPLING_DOWN_FACTOR,
         .down_differential = DEF_FREQUENCY_DOWN_DIFFERENTIAL,
         .ignore_nice = 0,
         .powersave_bias = 0,
+        .freq_boost_time = DEFAULT_FREQ_BOOST_TIME,
 };
 
 static inline cputime64_t get_cpu_idle_time_jiffy(unsigned int cpu,
@@ -259,11 +266,11 @@ define_one_global_ro(sampling_rate_max);
 define_one_global_ro(sampling_rate_min);
 
 /* cpufreq_ondemand Governor Tunables */
-#define show_one(file_name, object)                                     \
-static ssize_t show_##file_name                                         \
+#define show_one(file_name, object)                                        \
+static ssize_t show_##file_name                                                \
 (struct kobject *kobj, struct attribute *attr, char *buf)              \
-{                                                                       \
-        return sprintf(buf, "%u\n", dbs_tuners_ins.object);             \
+{                                                                        \
+        return sprintf(buf, "%u\n", dbs_tuners_ins.object);                \
 }
 show_one(sampling_rate, sampling_rate);
 show_one(io_is_busy, io_is_busy);
@@ -272,20 +279,23 @@ show_one(down_differential, down_differential);
 show_one(sampling_down_factor, sampling_down_factor);
 show_one(ignore_nice_load, ignore_nice);
 show_one(powersave_bias, powersave_bias);
+show_one(boostpulse, boosted);
+show_one(boosttime, freq_boost_time);
+show_one(boostfreq, boostfreq);
 
 /*** delete after deprecation time ***/
 
-#define DEPRECATION_MSG(file_name)                                      \
-        printk_once(KERN_INFO "CPUFREQ: Per core ondemand sysfs "       \
+#define DEPRECATION_MSG(file_name)                                        \
+        printk_once(KERN_INFO "CPUFREQ: Per core ondemand sysfs "        \
                     "interface is deprecated - " #file_name "\n");
 
-#define show_one_old(file_name)                                         \
-static ssize_t show_##file_name##_old                                   \
-(struct cpufreq_policy *unused, char *buf)                              \
-{                                                                       \
-        printk_once(KERN_INFO "CPUFREQ: Per core ondemand sysfs "       \
-                    "interface is deprecated - " #file_name "\n");      \
-        return show_##file_name(NULL, NULL, buf);                       \
+#define show_one_old(file_name)                                                \
+static ssize_t show_##file_name##_old                                        \
+(struct cpufreq_policy *unused, char *buf)                                \
+{                                                                        \
+        printk_once(KERN_INFO "CPUFREQ: Per core ondemand sysfs "        \
+                    "interface is deprecated - " #file_name "\n");        \
+        return show_##file_name(NULL, NULL, buf);                        \
 }
 show_one_old(sampling_rate);
 show_one_old(up_threshold);
@@ -297,6 +307,46 @@ show_one_old(sampling_rate_max);
 cpufreq_freq_attr_ro_old(sampling_rate_min);
 cpufreq_freq_attr_ro_old(sampling_rate_max);
 
+static ssize_t store_boosttime(struct kobject *kobj, struct attribute *attr,
+                                const char *buf, size_t count)
+{
+        unsigned int input;
+        int ret;
+
+        ret = sscanf(buf, "%u", &input);
+        if (ret != 1)
+                return -EINVAL;
+
+        dbs_tuners_ins.freq_boost_time = input;
+        return count;
+}
+
+
+static ssize_t store_boostpulse(struct kobject *kobj, struct attribute *attr,
+                                const char *buf, size_t count)
+{
+        //int ret;
+        unsigned long val;
+
+        //ret = kstrtoul(buf, 0, &val);
+        val = simple_strtoul(buf, &buf, 0);
+
+        dbs_tuners_ins.boosted = 1;
+        freq_boosted_time = ktime_to_us(ktime_get());
+        return count;
+}
+
+static ssize_t store_boostfreq(struct kobject *a, struct attribute *b,
+                                   const char *buf, size_t count)
+{
+        unsigned int input;
+        int ret;
+        ret = sscanf(buf, "%u", &input);
+        if (ret != 1)
+                return -EINVAL;
+        dbs_tuners_ins.boostfreq = input;
+        return count;
+}
 /*** delete after deprecation time ***/
 
 static ssize_t store_sampling_rate(struct kobject *a, struct attribute *b,
@@ -459,6 +509,9 @@ define_one_global_rw(down_differential);
 define_one_global_rw(sampling_down_factor);
 define_one_global_rw(ignore_nice_load);
 define_one_global_rw(powersave_bias);
+define_one_global_rw(boostpulse);
+define_one_global_rw(boosttime);
+define_one_global_rw(boostfreq);
 
 static struct attribute *dbs_attributes[] = {
         &sampling_rate_max.attr,
@@ -470,6 +523,9 @@ static struct attribute *dbs_attributes[] = {
         &ignore_nice_load.attr,
         &powersave_bias.attr,
         &io_is_busy.attr,
+        &boostpulse.attr,
+        &boosttime.attr,
+        &boostfreq.attr,
         NULL
 };
 
@@ -481,11 +537,11 @@ static struct attribute_group dbs_attr_group = {
 /*** delete after deprecation time ***/
 
 #define write_one_old(file_name)                                        \
-static ssize_t store_##file_name##_old                                  \
-(struct cpufreq_policy *unused, const char *buf, size_t count)          \
-{                                                                       \
+static ssize_t store_##file_name##_old                                        \
+(struct cpufreq_policy *unused, const char *buf, size_t count)                \
+{                                                                        \
        printk_once(KERN_INFO "CPUFREQ: Per core ondemand sysfs "        \
-                   "interface is deprecated - " #file_name "\n");       \
+                   "interface is deprecated - " #file_name "\n");        \
        return store_##file_name(NULL, NULL, buf, count);                \
 }
 write_one_old(sampling_rate);
@@ -538,12 +594,19 @@ static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
         this_dbs_info->freq_lo = 0;
         policy = this_dbs_info->cur_policy;
 
+        /* Only core0 controls the boost */
+        if (dbs_tuners_ins.boosted && policy->cpu == 0) {
+                if (ktime_to_us(ktime_get()) - freq_boosted_time >=
+                                        dbs_tuners_ins.freq_boost_time) {
+                        dbs_tuners_ins.boosted = 0;
+                }
+        }
         /*
          * Every sampling_rate, we check, if current idle time is less
-         * than 37% (default), then we try to increase frequency
+         * than 20% (default), then we try to increase frequency
          * Every sampling_rate, we look for a the lowest
          * frequency which can sustain the load while keeping idle time over
-         * 50%. If such a frequency exist, we try to decrease to this frequency.
+         * 30%. If such a frequency exist, we try to decrease to this frequency.
          *
          * Any frequency increase takes it to the maximum frequency.
          * Frequency reduction happens at minimum steps of
@@ -627,7 +690,12 @@ static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
                 dbs_freq_increase(policy, policy->max);
                 return;
         }
-
+        /* check for frequency boost */
+        if (dbs_tuners_ins.boosted && policy->cur < dbs_tuners_ins.boostfreq) {
+                dbs_freq_increase(policy, dbs_tuners_ins.boostfreq);
+                dbs_tuners_ins.boostfreq = policy->cur;
+                return;
+        }
         /* Check for frequency decrease */
         /* if we cannot reduce the frequency anymore, break out early */
         if (policy->cur == policy->min)
@@ -646,6 +714,10 @@ static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
                                 (dbs_tuners_ins.up_threshold -
                                  dbs_tuners_ins.down_differential);
 
+                if (dbs_tuners_ins.boosted &&
+                                freq_next < dbs_tuners_ins.boostfreq) {
+                        freq_next = dbs_tuners_ins.boostfreq;
+                }
                 /* No longer fully busy, reset rate_mult */
                 this_dbs_info->rate_mult = 1;
 
@@ -767,6 +839,14 @@ static DECLARE_WORK(dbs_refresh_work, dbs_refresh_callback);
 static void dbs_input_event(struct input_handle *handle, unsigned int type,
                 unsigned int code, int value)
 {
+#ifdef CONFIG_ZTE_PLATFORM
+        if (!strcmp(handle->dev->name, "compass"))
+                return;
+        #ifdef CONFIG_ZTE_NO_CPUFREQ_ONDEMAND_KEYBOARD        //LHX_PM_20110706_01 not change cpufreq while keyboard input
+        if (strstr(handle->dev->name, "keypad"))
+                return;
+        #endif
+#endif
         schedule_work_on(0, &dbs_refresh_work);
 }
 
@@ -813,11 +893,11 @@ static const struct input_device_id dbs_ids[] = {
 };
 
 static struct input_handler dbs_input_handler = {
-        .event          = dbs_input_event,
+        .event                = dbs_input_event,
         .connect        = dbs_input_connect,
-        .disconnect     = dbs_input_disconnect,
-        .name           = "cpufreq_ond",
-        .id_table       = dbs_ids,
+        .disconnect        = dbs_input_disconnect,
+        .name                = "cpufreq_ond",
+        .id_table        = dbs_ids,
 };
 
 static int cpufreq_governor_dbs(struct cpufreq_policy *policy,
@@ -980,4 +1060,3 @@ fs_initcall(cpufreq_gov_dbs_init);
 module_init(cpufreq_gov_dbs_init);
 #endif
 module_exit(cpufreq_gov_dbs_exit);
-
