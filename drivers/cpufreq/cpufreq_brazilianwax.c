@@ -693,10 +693,6 @@ static int cpufreq_governor_brazilianwax(struct cpufreq_policy *new_policy,
                 unsigned int event)
 {
         unsigned int cpu = new_policy->cpu;
-		unsigned int min_freq = ~0;
-		unsigned int max_freq = 0;
-		unsigned int i;
-		struct cpufreq_frequency_table *freq_table;
         int rc;
         struct brazilianwax_info_s *this_brazilianwax = &per_cpu(brazilianwax_info, cpu);
 
@@ -719,24 +715,6 @@ static int cpufreq_governor_brazilianwax(struct cpufreq_policy *new_policy,
 
                 this_brazilianwax->cur_policy = new_policy;
                 this_brazilianwax->enable = 1;
-
-				freq_table = cpufreq_frequency_get_table(new_policy->cpu);
-				for (i = 0; (freq_table[i].frequency != CPUFREQ_TABLE_END); i++) {
-					unsigned int freq = freq_table[i].frequency;
-					if (freq == CPUFREQ_ENTRY_INVALID) {
-						continue;
-					}
-					if (freq < min_freq)	
-						min_freq = freq;
-					if (freq > max_freq)
-						max_freq = freq;
-				}
-				sleep_max_freq = min_freq;								//Minimum CPU frequency in table
-				sleep_wakeup_freq = freq_table[(i-1)/2].frequency > min_freq ? freq_table[(i-1)/2].frequency : max_freq;		//Value in midrange of available CPU frequencies if sufficient number of freq bins available
-				threshold_freq = i > 0 ? freq_table[i-1].frequency : max_freq;
-				up_min_freq = max_freq;
-				awake_min_freq = min_freq;
-				suspendfreq = freq_table[(i-1)/2].frequency > min_freq ? freq_table[(i-1)/2].frequency : max_freq;		//Value in midrange of available CPU frequencies if sufficient number of freq bins available
 
 		// imoseyon - should only register for suspend when governor active
         	register_early_suspend(&brazilianwax_power_suspend); 
@@ -815,7 +793,7 @@ static int __init cpufreq_brazilianwax_init(void)
         }
 
         /* Scale up is high priority */
-        alloc_workqueue("kbrazilianwax_up", WQ_HIGHPRI | WQ_CPU_INTENSIVE, 1);
+        up_wq = create_rt_workqueue("kbrazilianwax_up");
         down_wq = create_workqueue("kbrazilianwax_down");
 
         INIT_WORK(&freq_scale_work, cpufreq_brazilianwax_freq_change_time_work);
@@ -844,3 +822,4 @@ module_exit(cpufreq_brazilianwax_exit);
 MODULE_AUTHOR ("Erasmux/imoseyon");
 MODULE_DESCRIPTION ("'cpufreq_brazilianwax' - A smart cpufreq governor optimized for the hero!");
 MODULE_LICENSE ("GPL");
+
