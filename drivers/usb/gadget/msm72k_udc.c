@@ -48,6 +48,9 @@
 #include <mach/rpc_hsusb.h>
 #include <linux/uaccess.h>
 #include <linux/wakelock.h>
+#ifdef CONFIG_FORCE_FAST_CHARGE
+#include <linux/fastchg.h>
+#endif
 
 
 #if defined (CONFIG_FTS_USB_NOTIFY)
@@ -310,10 +313,15 @@ static ssize_t print_switch_state(struct switch_dev *sdev, char *buf)
 #ifdef ARM11_DETECT_CHG
 static inline enum chg_type usb_get_chg_type(struct usb_info *ui)
 {
-	if ((readl(USB_PORTSC) & PORTSC_LS) == PORTSC_LS)
-		return USB_CHG_TYPE__WALLCHARGER;
-	else
-		return USB_CHG_TYPE__SDP;
+#ifdef CONFIG_FORCE_FAST_CHARGE
+	if ((readl(USB_PORTSC) & PORTSC_LS) == PORTSC_LS || force_fast_charge == 1) {
+#else
+ 	if ((readl(USB_PORTSC) & PORTSC_LS) == PORTSC_LS)
+#endif
+ 		return USB_CHG_TYPE__WALLCHARGER;
+	}
+	else 
+ 		return USB_CHG_TYPE__SDP;
 }
 
 #define USB_WALLCHARGER_CHG_CURRENT 1800

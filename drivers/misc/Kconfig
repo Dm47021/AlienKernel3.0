@@ -518,6 +518,13 @@ config PMIC8058_BATTALARM
 	  This option enables support for the battery alarm module on the
 	  Qualcomm PM8058 PMIC chip.  This support allows for configuration of
 	  the alarm module as well as interrupt handling.
+	  
+config FORCE_FAST_CHARGE
+        bool "Force AC charge mode at will"
+        default y
+        help
+          A simple sysfs interface to force adapters that
+          are detected as USB to charge as AC.
 
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
