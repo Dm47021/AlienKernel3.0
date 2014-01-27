@@ -103,21 +103,6 @@
 extern struct atmel_i2c_platform_data atmel_data;
 #endif
 
-#if defined(CONFIG_ALIEN_4_BIG_MEMORY)
-/* ALIEN 4 BIG MEMORY TABLE */
-#define MSM_PMEM_SF_SIZE	0x1C00000 // orig 0x1700000
-#ifdef CONFIG_FB_MSM_TRIPLE_BUFFER
-#define MSM_FB_SIZE            0x780000
-#else
-#define MSM_FB_SIZE            0x400000 // orig 0x500000
-#endif
-#define MSM_GPU_PHYS_SIZE       SZ_4M
-#define MSM_PMEM_ADSP_SIZE      0x1000000 // orig 0x1800000
-#define MSM_FLUID_PMEM_ADSP_SIZE	0x1900000 // 0x2800000
-#define PMEM_KERNEL_EBI1_SIZE   0x30000 // 0x600000
-#define MSM_PMEM_AUDIO_SIZE     0x200000 // 0x200000
-
-#else
 /* STOCK MEMORY TABLE */
 #define MSM_PMEM_SF_SIZE	0x1700000
 #ifdef CONFIG_FB_MSM_TRIPLE_BUFFER
@@ -130,8 +115,6 @@ extern struct atmel_i2c_platform_data atmel_data;
 #define MSM_FLUID_PMEM_ADSP_SIZE	0x2800000
 #define PMEM_KERNEL_EBI1_SIZE   0x600000 
 #define MSM_PMEM_AUDIO_SIZE     0x200000
-
-#endif
 
 #define PMIC_GPIO_INT		27
 #define PMIC_VREG_WLAN_LEVEL	2900
