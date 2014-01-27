@@ -793,7 +793,7 @@ static int __init cpufreq_darkside_init(void)
         }
 
         /* Scale up is high priority */
-        up_wq = create_rt_workqueue("kdarkside_up");
+        up_wq = create_workqueue("kdarkside_up");
         down_wq = create_workqueue("kdarkside_down");
 
         INIT_WORK(&freq_scale_work, cpufreq_darkside_freq_change_time_work);
