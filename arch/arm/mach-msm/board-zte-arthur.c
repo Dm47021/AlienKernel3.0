@@ -110,7 +110,7 @@ extern struct atmel_i2c_platform_data atmel_data;
 #else
 #define MSM_FB_SIZE            0x500000 
 #endif
-#define MSM_GPU_PHYS_SIZE       SZ_4M
+
 #define MSM_PMEM_ADSP_SIZE      0x1800000 
 #define MSM_FLUID_PMEM_ADSP_SIZE	0x2800000
 #define PMEM_KERNEL_EBI1_SIZE   0x600000 
@@ -7405,13 +7405,6 @@ static void __init fb_size_setup(char **p)
 	fb_size = memparse(*p, p);
 }
 __early_param("fb_size=", fb_size_setup);
-
-static unsigned gpu_phys_size = MSM_GPU_PHYS_SIZE;
-static void __init gpu_phys_size_setup(char **p)
-{
-	gpu_phys_size = memparse(*p, p);
-}
-__early_param("gpu_phys_size=", gpu_phys_size_setup);
 
 static unsigned pmem_adsp_size = MSM_PMEM_ADSP_SIZE;
 static void __init pmem_adsp_size_setup(char **p)
