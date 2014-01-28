@@ -2856,7 +2856,8 @@ static int  lcdc_panel_probe(struct platform_device *pdev)
 			pinfo->lcdc.hsync_skew = 0;
 		}
 		pinfo->xres = 480;
-		pinfo->yres = 800;		
+		pinfo->yres = 800;
+                MSM_FB_SINGLE_MODE_PANEL(pinfo);		
 		pinfo->type = LCDC_PANEL;
 		pinfo->pdest = DISPLAY_1;
 		pinfo->wait_cycle = 0;
