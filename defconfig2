@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.35.7
-# Mon Jan 27 00:55:31 2014
+# Mon Feb 10 10:03:16 2014
 #
 CONFIG_ARM=y
 CONFIG_SYS_SUPPORTS_APM_EMULATION=y
@@ -1026,6 +1026,9 @@ CONFIG_EXTRA_FIRMWARE=""
 # CONFIG_SYS_HYPERVISOR is not set
 CONFIG_GENLOCK=y
 CONFIG_GENLOCK_MISCDEVICE=y
+CONFIG_SYNC=y
+CONFIG_SW_SYNC=y
+CONFIG_SW_SYNC_USER=y
 CONFIG_PM_OPP=y
 # CONFIG_CONNECTOR is not set
 # CONFIG_MTD is not set
