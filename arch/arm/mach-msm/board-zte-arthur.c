@@ -4295,8 +4295,8 @@ static struct platform_device android_pmem_audio_device = {
        .dev = { .platform_data = &android_pmem_audio_pdata },
 };
 
-
-struct resource kgsl_3d0_resources[] = {
+//gsl
+static struct resource kgsl_3d0_resources[] = {
 	{
 		.name  = KGSL_3D0_REG_MEMORY,
 		.start = 0xA3500000, /* 3D GRP address */
@@ -4312,20 +4312,14 @@ struct resource kgsl_3d0_resources[] = {
 };
 
 static struct kgsl_device_platform_data kgsl_3d0_pdata = {
-	.pwr_data = {
 		.pwrlevel = {
 			{
 				.gpu_freq = 245760000,
-#if defined(CONFIG_ALIEN_GPU_OC)
-                                .bus_freq = 210000000,
-#else
 				.bus_freq = 192000000,
-#endif
-                                
 			},
 			{
 				.gpu_freq = 192000000,
-				.bus_freq = 152000000,
+				.bus_freq = 153000000,
 			},
 			{
 				.gpu_freq = 192000000,
@@ -4337,21 +4331,17 @@ static struct kgsl_device_platform_data kgsl_3d0_pdata = {
 		.set_grp_async = set_grp3d_async,
 		.idle_timeout = HZ/20,
 		.nap_allowed = true,
-		.idle_needed = true,
-	},
-	.clk = {
-		.name = {
+		.clk = {
 			.clk = "grp_clk",
 			.pclk = "grp_pclk",
 		},
-	},
-	.imem_clk_name = {
-		.clk = "imem_clk",
-		.pclk = NULL,
-	},
+		.imem_clk_name = {
+			.clk = "imem_clk",
+			.pclk = NULL,
+		},
 };
 
-struct platform_device msm_kgsl_3d0 = {
+static struct platform_device msm_kgsl_3d0 = {
 	.name = "kgsl-3d0",
 	.id = 0,
 	.num_resources = ARRAY_SIZE(kgsl_3d0_resources),
@@ -4361,6 +4351,7 @@ struct platform_device msm_kgsl_3d0 = {
 	},
 };
 
+#ifdef CONFIG_MSM_KGSL_2D
 static struct resource kgsl_2d0_resources[] = {
 	{
 		.name = KGSL_2D0_REG_MEMORY,
@@ -4377,7 +4368,6 @@ static struct resource kgsl_2d0_resources[] = {
 };
 
 static struct kgsl_device_platform_data kgsl_2d0_pdata = {
-	.pwr_data = {
 		.pwrlevel = {
 			{
 				.gpu_freq = 0,
@@ -4390,17 +4380,13 @@ static struct kgsl_device_platform_data kgsl_2d0_pdata = {
 		.set_grp_async = NULL,
 		.idle_timeout = HZ/10,
 		.nap_allowed = true,
-		.idle_needed = true,
-	},
-	.clk = {
-		.name = {
+		.clk = {
 			.clk = "grp_2d_clk",
 			.pclk = "grp_2d_pclk",
 		},
-	},
 };
 
-struct platform_device msm_kgsl_2d0 = {
+static struct platform_device msm_kgsl_2d0 = {
 	.name = "kgsl-2d0",
 	.id = 0,
 	.num_resources = ARRAY_SIZE(kgsl_2d0_resources),
@@ -4409,6 +4395,8 @@ struct platform_device msm_kgsl_2d0 = {
 		.platform_data = &kgsl_2d0_pdata,
 	},
 };
+#endif
+//gsl
 
 static int mddi_toshiba_pmic_bl(int level)
 {
